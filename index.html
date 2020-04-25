@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Form using react</title>
+
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+
+
+        const CardList = (props) => (
+            <div>
+                {props.profiles.map(profile => <Card {...profile} />)}
+            </div>
+        );
+
+        class Card extends React.Component {
+
+            render() {
+                const profile = this.props;
+                return (
+                    <div className="github-profile">
+                        <img src={profile.avatar_url} />
+                        <div className="info">
+                            <div className="name">{profile.name}</div>
+                            <div className="company">{profile.company}</div>
+                        </div>
+                    </div>
+                );
+
+            }
+        }
+        class Form extends React.Component {
+            state = {
+                username: "",
+            };
+            Username = (event) => {
+                this.setState({ username: event.target.value });
+                console.log(this.state.username);
+            }
+            handleSubmit = async (event) => {
+                event.preventDefault();
+                const res = await axios.get(`https://api.github.com/users/${this.state.username}`);
+                console.log(res)
+                this.props.onSubmit(res.data);
+                this.setState({ username: "" });
+
+            }
+            render() {
+                return (
+                    <form action="" onSubmit={this.handleSubmit}>
+                        <input type="text"
+                            placeholder="Githubusername"
+                            value={this.state.username}
+                            onChange={this.Username} />
+                        <button>Add</button>
+                    </form>
+                );
+            }
+        }
+        class App extends React.Component {
+            state = {
+                profiles: [],
+            };
+            addNewProfile = (resp) => {
+                this.setState(prevState => ({
+                    profiles: [...prevState.profiles, resp],
+                }))
+            };
+
+            render() {
+                return (
+                    <div>
+                        <div>{this.props.title} </div>
+                        <Form onSubmit={this.addNewProfile} />
+                        <CardList profiles={this.state.profiles} />
+                    </div>
+                );
+            }
+        }
+
+        ReactDOM.render(
+            <App title="The Github Card App" />,
+            document.getElementById('root'),
+        );
+
+    </script>
+
+</body>
+
+</html>
